@@ -1,4 +1,4 @@
-# Raster_processing_public
+# GeoRaster processing public
 Anyone can use these codes for free as it is and can copy or modify to derive the products for geospatial analysis.
 
 Coding language: Python 3
