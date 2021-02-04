@@ -1,0 +1,30 @@
+import os
+import rasterio
+
+inputPath='H:/SpaceImages/RGBN/TML/'
+outputpath='H:/SpaceImages/Final_MOS/'
+
+for file in os.listdir(inputPath):
+    if file.endswith('B04.jp2'):
+        red=os.path.join(inputPath, file)
+    if file.endswith('B03.jp2'):
+        green=os.path.join(inputPath, file)
+    if file.endswith('B02.jp2'):
+        blue=os.path.join(inputPath, file)
+    if file.endswith('B08.jp2'):
+        nir=os.path.join(inputPath, file)
+        file_list =[red,green,blue,nir]
+        # Read metadata of first file
+        with rasterio.open(file_list[1]) as src0:
+            meta = src0.meta
+            print(meta)
+        # Update meta to reflect the number of layers
+        meta.update(count = len(file_list))
+        #print(meta)
+        outtif=os.path.join(outputpath, file[:-7]+'b4328'+'.TIF')
+        # Read each layer and write it to stack
+        with rasterio.open(outtif, 'w', **meta) as dst:
+            for id, layer in enumerate(file_list, start=1):
+                with rasterio.open(layer) as src1:
+                    dst.write_band(id, src1.read(1))        
+        print(outtif)
