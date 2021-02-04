@@ -1,0 +1,23 @@
+import os
+from osgeo import gdal
+
+inputPath='G:/Data_K_20201014/ML_classification/006_Qazaly/001_Rasters/Sentinel/001_Initial_10m_images/0003_Unzip/RGBN/'
+outputpath='G:/Data_K_20201014/ML_classification/006_Qazaly/001_Rasters/Sentinel/003_MS/'
+
+for file in os.listdir(inputPath):
+    if file.endswith('B04.jp2'):
+        red=os.path.join(inputPath, file)
+    if file.endswith('B03.jp2'):
+        green=os.path.join(inputPath, file)
+    if file.endswith('B02.jp2'):
+        blue=os.path.join(inputPath, file)
+    if file.endswith('B08.jp2'):
+        nir=os.path.join(inputPath, file)
+    file_list =[red,green,blue,nir]
+    #print(file_list)   
+    outvrt=os.path.join(outputpath,file[:-7]+'b4328'+'.vrt')
+    outtif=os.path.join(outputpath,file[:-7]+'b4328'+'.TIF')
+    #print(outvrt)
+    outds = gdal.BuildVRT(outvrt, file_list, hideNodata=True, separate=True)
+    outds = gdal.Translate(outtif, outds)
+    print(outtif)
