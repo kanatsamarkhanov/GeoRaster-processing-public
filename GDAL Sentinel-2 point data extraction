@@ -1,0 +1,31 @@
+import os
+import gdal
+from osgeo import ogr
+import pandas as pd
+
+inputPath = 'G:/Data_K_20201014/ML_classification/006_Qazaly/001_Rasters/Sentinel/001_Initial_10m_images/0003_Unzip/2018_Jun/S2B_MSIL1C_20180623T064619_N0206_R020_T41TLL_20180623T085613.SAFE/GRANULE/L1C_T41TLL_A006767_20180623T065103/IMG_DATA/'
+outputPath ='G:/Data_K_20201014/ML_classification/006_Qazaly/002_Vectors/Extracted/'
+
+shp_filename = 'G:/Data_K_20201014/ML_classification/006_Qazaly/002_Vectors/Final20201105/In-situ_corr_data20210205_32641.geojson'
+rasterlist=[band for band in os.listdir(inputPath) if band[-4:]=='.jp2']
+for file in rasterlist:
+    raster_band=gdal.Open(inputPath+file)
+    print(raster_band)
+    ds=ogr.Open(shp_filename)
+    lyr=ds.GetLayer()
+    li_values = list()
+    for feat in lyr:
+        geom = feat.GetGeometryRef()
+        mx,my=geom.GetX(), geom.GetY()  #coord in map units
+        feat_id = feat.GetField('Name')
+        #print(feat)
+        gt=raster_band.GetGeoTransform()    
+        px = int((mx - gt[0]) / gt[1]) #x pixel
+        py = int((my - gt[3]) / gt[5]) #y pixel
+        intval=raster_band.ReadAsArray(px,py,1,1)
+        for pix in intval:
+            print(pix)
+        li_values.append([feat_id,float(pix[0])]) #to get the table consisting just of each value per corresponding field point
+        data=pd.DataFrame(li_values,columns=['Index','Value'])
+        #print(data)
+        data.to_csv(outputPath+'extracted_'+file[:-4]+'.csv')                    
